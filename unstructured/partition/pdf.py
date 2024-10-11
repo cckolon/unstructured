@@ -18,7 +18,6 @@ from pdfminer.utils import open_filename
 from pi_heif import register_heif_opener
 from PIL import Image as PILImage
 from pypdf import PdfReader
-
 from unstructured.chunking import add_chunking_strategy
 from unstructured.cleaners.core import (
     clean_extra_whitespace_with_index_run,
@@ -60,8 +59,12 @@ from unstructured.partition.pdf_image.analysis.layout_dump import (
     ObjectDetectionLayoutDumper,
     OCRLayoutDumper,
 )
-from unstructured.partition.pdf_image.analysis.tools import save_analysis_artifiacts
-from unstructured.partition.pdf_image.form_extraction import run_form_extraction
+from unstructured.partition.pdf_image.analysis.tools import (
+    save_analysis_artifiacts,
+)
+from unstructured.partition.pdf_image.form_extraction import (
+    run_form_extraction,
+)
 from unstructured.partition.pdf_image.pdf_image_utils import (
     check_element_types_to_extract,
     convert_pdf_to_images,
@@ -75,7 +78,10 @@ from unstructured.partition.pdf_image.pdfminer_utils import (
     open_pdfminer_pages_generator,
     rect_to_bbox,
 )
-from unstructured.partition.strategies import determine_pdf_or_image_strategy, validate_strategy
+from unstructured.partition.strategies import (
+    determine_pdf_or_image_strategy,
+    validate_strategy,
+)
 from unstructured.partition.text import element_from_text
 from unstructured.partition.utils.config import env_config
 from unstructured.partition.utils.constants import (
@@ -86,7 +92,10 @@ from unstructured.partition.utils.constants import (
     OCRMode,
     PartitionStrategy,
 )
-from unstructured.partition.utils.sorting import coord_has_valid_points, sort_page_elements
+from unstructured.partition.utils.sorting import (
+    coord_has_valid_points,
+    sort_page_elements,
+)
 from unstructured.patches.pdfminer import parse_keyword
 from unstructured.utils import requires_dependencies
 
@@ -425,6 +434,7 @@ def _process_pdfminer_pages(
     for page_number, (page, page_layout) in enumerate(
         open_pdfminer_pages_generator(fp), start=starting_page_number
     ):
+        logger.info(f"Processing page {page_number}")
         width, height = page_layout.width, page_layout.height
 
         page_elements: list[Element] = []
@@ -548,15 +558,17 @@ def _partition_pdf_or_image_local(
     **kwargs: Any,
 ) -> list[Element]:
     """Partition using package installed locally"""
-    from unstructured_inference.inference.layout import (
-        process_data_with_model,
-        process_file_with_model,
+    from unstructured.partition.pdf_image.ocr import (
+        process_data_with_ocr,
+        process_file_with_ocr,
     )
-
-    from unstructured.partition.pdf_image.ocr import process_data_with_ocr, process_file_with_ocr
     from unstructured.partition.pdf_image.pdfminer_processing import (
         process_data_with_pdfminer,
         process_file_with_pdfminer,
+    )
+    from unstructured_inference.inference.layout import (
+        process_data_with_model,
+        process_file_with_model,
     )
 
     if not is_image:
