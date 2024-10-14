@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import tempfile
 from typing import IO, TYPE_CHECKING, Any, List, Optional, cast
@@ -10,7 +11,6 @@ import pdf2image
 # unstructured.documents.elements.Image
 from PIL import Image as PILImage
 from PIL import ImageSequence
-
 from unstructured.documents.elements import ElementType
 from unstructured.metrics.table.table_formats import SimpleTableCell
 from unstructured.partition.pdf_image.analysis.layout_dump import OCRLayoutDumper
@@ -25,6 +25,8 @@ if TYPE_CHECKING:
     from unstructured_inference.inference.layout import DocumentLayout, PageLayout
     from unstructured_inference.inference.layoutelement import LayoutElement
     from unstructured_inference.models.tables import UnstructuredTableTransformerModel
+
+logger = logging.getLogger(__name__)
 
 
 def process_data_with_ocr(
@@ -160,6 +162,7 @@ def process_file_with_ocr(
                 )
                 image_paths = cast(List[str], _image_paths)
                 for i, image_path in enumerate(image_paths):
+                    logger.info(f"Processing image {i+1} of {len(image_paths)}")
                     extracted_regions = extracted_layout[i] if i < len(extracted_layout) else None
                     with PILImage.open(image_path) as image:
                         merged_page_layout = supplement_page_layout_with_ocr(

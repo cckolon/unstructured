@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+from unstructured.documents.elements import ElementType
 from unstructured_inference.constants import Source
-from unstructured_inference.inference.elements import TextRegion
+from unstructured_inference.inference.elements import TextRegion, TextRegions
 from unstructured_inference.inference.layoutelement import (
     LayoutElement,
     partition_groups_from_regions,
 )
-
-from unstructured.documents.elements import ElementType
 
 if TYPE_CHECKING:
     from unstructured_inference.inference.elements import Rectangle
@@ -68,9 +67,9 @@ def build_layout_elements_from_ocr_regions(
 
             grouped_regions.append(regions)
     else:
-        grouped_regions = partition_groups_from_regions(ocr_regions)
-
-    merged_regions = [merge_text_regions(group) for group in grouped_regions]
+        text_regions = TextRegions.from_list(ocr_regions)
+        grouped_regions = partition_groups_from_regions(text_regions)
+    merged_regions = [merge_text_regions(group.as_list()) for group in grouped_regions]
     return [
         build_layout_element(
             bbox=r.bbox, text=r.text, source=r.source, element_type=ElementType.UNCATEGORIZED_TEXT
